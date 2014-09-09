@@ -1,11 +1,15 @@
 {
   "name": "voyager-generator",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Voyager application generator",
   "author": "David Glivar <davidglivar@gmail.com>",
   "license": "ISC",
   "bin": {
     "voyager": "./bin/voyager"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:davidglivar/voyager-generator.git"
   },
   "dependencies": {
     "es6-promise": "^1.0.0",
