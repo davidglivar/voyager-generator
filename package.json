@@ -1,8 +1,8 @@
 {
   "name": "voyager-generator",
   "version": "0.0.0",
-  "description": "",
-  "author": "",
+  "description": "Voyager application generator",
+  "author": "David Glivar <davidglivar@gmail.com>",
   "license": "ISC",
   "bin": {
     "voyager": "./bin/voyager"
