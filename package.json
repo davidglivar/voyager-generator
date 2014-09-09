@@ -7,6 +7,10 @@
   "bin": {
     "voyager": "./bin/voyager"
   },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:davidglivar/voyager-generator.git"
+  },
   "dependencies": {
     "es6-promise": "^1.0.0",
     "graceful-fs": "^3.0.2",

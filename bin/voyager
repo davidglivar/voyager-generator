@@ -125,6 +125,7 @@ function writePackage() {
     for (var i = 0, l = settings.tasks.length; i < l; i++) {
       settings.devDependencies[settings.tasks[i]] = packages[settings.tasks[i]];
     }
+    settings.devDependencies.voyager = '^0.3.0';
     fs.writeFile(CWD + '/package.json', JSON.stringify(settings, null, 2), function (err) {
       if (err) return fail(err);
       done();
