@@ -1,0 +1,16 @@
+{
+  "name": "voyager-generator",
+  "version": "0.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "bin": {
+    "voyager": "./bin/voyager"
+  }
+  "dependencies": {
+    "es6-promise": "^1.0.0",
+    "graceful-fs": "^3.0.2",
+    "inquirer": "^0.7.1",
+    "vinyl-fs": "^0.3.7"
+  }
+}
