@@ -7,6 +7,7 @@ var inquirer = require('inquirer')
   , Promise = require('es6-promise').Promise
   , vfs = require('vinyl-fs')
 
+  , args = Array.prototype.slice.call(process.argv, 2)
   , j = path.join
   , packages = {
       'voyager-browserify': 'davidglivar/voyager-browserify'
@@ -17,7 +18,7 @@ var inquirer = require('inquirer')
       type: 'input'
     , name: 'name'
     , message: 'Project name'
-    , default: path.basename(process.cwd())
+    , default: args[0] || path.basename(process.cwd())
     }, {
       type: 'input'
     , name: 'version'
@@ -59,7 +60,8 @@ var inquirer = require('inquirer')
       }]
     }]
   , settings
-  , CWD = process.cwd();
+  , CWD = process.cwd()
+  , BASE = args[0] ? j(CWD, args[0]) : CWD;
 
 function build() {
   console.log('building');
@@ -68,22 +70,25 @@ function build() {
     .then(seed)
     .then(function () {
       console.log('done!');
-      console.log('run `npm install && voyager start`');
+    })
+    ['catch'](function (err) {
+      console.log('error');
+      console.log(err);
     });
 }
 
 function buildSkeleton() {
   return new Promise(function (done, fail) {
-    fs.mkdir(CWD + '/src', function (err) {
+    fs.mkdir(BASE + '/src', function (err) {
       if (err) return fail(err);
-      fs.mkdirSync(CWD + '/src/fonts');
-      fs.mkdirSync(CWD + '/src/images');
-      fs.mkdirSync(CWD + '/src/javascripts');
-      fs.mkdirSync(CWD + '/src/javascripts/lib');
-      fs.mkdirSync(CWD + '/src/javascripts/vendor');
-      fs.mkdirSync(CWD + '/src/stylesheets');
-      fs.mkdirSync(CWD + '/src/stylesheets/lib');
-      fs.mkdirSync(CWD + '/src/stylesheets/vendor');
+      fs.mkdirSync(BASE + '/src/fonts');
+      fs.mkdirSync(BASE + '/src/images');
+      fs.mkdirSync(BASE + '/src/javascripts');
+      fs.mkdirSync(BASE + '/src/javascripts/lib');
+      fs.mkdirSync(BASE + '/src/javascripts/vendor');
+      fs.mkdirSync(BASE + '/src/stylesheets');
+      fs.mkdirSync(BASE + '/src/stylesheets/lib');
+      fs.mkdirSync(BASE + '/src/stylesheets/vendor');
       done();
     });
   });
@@ -92,28 +97,39 @@ function buildSkeleton() {
 function seed() {
   return Promise.all([
     new Promise(function (done, fail) {
-      vfs.src(['../support/images/**'])
-        .pipe(vfs.dest(CWD + '/src/images'))
+      vfs.src([j(__dirname, '../support/images/**')])
+        .pipe(vfs.dest(j(BASE, '/src/images')))
+        .on('error', fail)
         .on('end', done);
     })
   , new Promise(function (done, fail) {
-      vfs.src(['../support/javascripts/**/*.js'])
-        .pipe(vfs.dest(CWD + '/src/javascripts'))
+      vfs.src([j(__dirname, '../support/javascripts/**/*.js')])
+        .pipe(vfs.dest(j(BASE, '/src/javascripts')))
+        .on('error', fail)
         .on('end', done);
     })
   , new Promise(function (done, fail) {
-      vfs.src(['../support/stylesheets/**'])
-        .pipe(vfs.dest(CWD + '/src/stylesheets'))
+      vfs.src([j(__dirname, '../support/bin/cmd')])
+        .pipe(vfs.dest(j(BASE, '/bin')))
+        .on('error', fail)
+        .on('end', done);
+    })
+  , new Promise(function (done, fail) {
+      vfs.src([j(__dirname, '../support/stylesheets/**')])
+        .pipe(vfs.dest(j(BASE, '/src/stylesheets')))
+        .on('error', fail)
         .on('end', done);
     })
   , new Promise(function (done, fail) {
       vfs.src([
-          '../support/.jshintrc'
-        , '../support/*.txt'
-        , '../support/favicon.ico'
-        , '../support/apple-touch-icon-precomposed.png'
+          j(__dirname, '../support/.jshintrc')
+        , j(__dirname, '../support/index.html')
+        , j(__dirname, '../support/*.txt')
+        , j(__dirname, '../support/favicon.ico')
+        , j(__dirname, '../support/apple-touch-icon-precomposed.png')
         ])
-        .pipe(vfs.dest(CWD + '/src'))
+        .pipe(vfs.dest(j(BASE, '/src')))
+        .on('error', fail)
         .on('end', done);
     })
   ]);
@@ -121,12 +137,14 @@ function seed() {
 
 function writePackage() {
   return new Promise(function (done, fail) {
+    if (args[0]) fs.mkdirSync(BASE);
+    settings.scripts = { start: './bin/cmd start' };
     settings.devDependencies = {};
     for (var i = 0, l = settings.tasks.length; i < l; i++) {
       settings.devDependencies[settings.tasks[i]] = packages[settings.tasks[i]];
     }
     settings.devDependencies.voyager = '^0.3.0';
-    fs.writeFile(CWD + '/package.json', JSON.stringify(settings, null, 2), function (err) {
+    fs.writeFile(j(BASE, '/package.json'), JSON.stringify(settings, null, 2), function (err) {
       if (err) return fail(err);
       done();
     });
