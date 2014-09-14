@@ -71,6 +71,20 @@ function buildSkeleton() {
   });
 }
 
+function finish(answers) {
+  inquirer.prompt([{
+    type: 'confirm'
+  , name: 'ok'
+  , message: JSON.stringify(answers, null, 2) + '\nDoes this look right?'
+  , default: true
+  }], function (answer) {
+    if (answer.ok) {
+      settings = answers;
+      build();
+    }
+  });
+}
+
 function seed() {
   return Promise.all([
     new Promise(function (done, fail) {
@@ -125,15 +139,20 @@ function writePackage() {
 }
 
 inquirer.prompt(questions, function (answers) {
-  inquirer.prompt([{
-    type: 'confirm'
-  , name: 'ok'
-  , message: JSON.stringify(answers, null, 2) + '\nDoes this look right?'
-  , default: true
-  }], function (answer) {
-    if (answer.ok) {
-      settings = answers;
-      build();
+  fs.readdir(BASE, function (err, files) {
+    if (files && files.length) {
+      inquirer.prompt([{
+        type: 'confirm'
+      , name: 'nonempty'
+      , message: 'WARNING: The directory ' + BASE + ' is not empty, do you wish to continue?'
+      , default: false
+      }], function (answer) {
+        if (answer.nonempty) {
+          finish();
+        }
+      });
+    } else {
+      finish(answers);
     }
-  });
+  });  
 });
