@@ -129,7 +129,11 @@ function seed() {
 function writePackage() {
   return new Promise(function (done, fail) {
     if (args[0]) fs.mkdirSync(BASE);
-    settings.scripts = { start: './bin/cmd start' };
+    settings.scripts = { 
+      start: './bin/cmd start'
+    , build: './bin/cmd build'
+    , clean: './bin/cmd clean'
+    };
     settings.devDependencies = { voyager: '^0.3.0'};
     fs.writeFile(j(BASE, '/package.json'), JSON.stringify(settings, null, 2), function (err) {
       if (err) return fail(err);
