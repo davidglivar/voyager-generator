@@ -4,16 +4,12 @@ var inquirer = require('inquirer')
   , child_process = require('child_process')
   , fs = require('graceful-fs')
   , path = require('path')
+  , Pinwheel = require('pinwheel')()
   , Promise = require('es6-promise').Promise
   , vfs = require('vinyl-fs')
 
   , args = Array.prototype.slice.call(process.argv, 2)
   , j = path.join
-  , packages = {
-      'voyager-browserify': 'davidglivar/voyager-browserify'
-    , 'voyager-jshint': 'davidglivar/voyager-jshint'
-    , 'voyager-stylus': 'davidglivar/voyager-stylus'
-    }
   , questions = [{
       type: 'input'
     , name: 'name'
@@ -38,41 +34,22 @@ var inquirer = require('inquirer')
     , name: 'license'
     , message: 'License'
     , default: 'ISC'
-    }, {
-      type: 'checkbox'
-    , name: 'tasks'
-    , message: 'Include some popular tasks?'
-    , choices: [{
-        key: 'voyager-browserify'
-      , name: 'voyager-browserify'
-      , value: 'voyager-browserify'
-      , checked: true
-      }, {
-        key: 'voyager-stylus'
-      , name: 'voyager-stylus'
-      , value: 'voyager-stylus'
-      , checked: true
-      }, {
-        key: 'voyager-jshint'
-      , name: 'voyager-jshint'
-      , value: 'voyager-jshint'
-      , checked: true
-      }]
     }]
   , settings
+  , wheel = new Pinwheel('Building...')
   , CWD = process.cwd()
   , BASE = args[0] ? j(CWD, args[0]) : CWD;
 
 function build() {
-  console.log('building');
+  wheel.start();
   writePackage()
     .then(buildSkeleton)
     .then(seed)
     .then(function () {
-      console.log('done!');
+      wheel.stop();
     })
     ['catch'](function (err) {
-      console.log('error');
+      wheel.stop(err);
       console.log(err);
     });
 }
@@ -91,6 +68,20 @@ function buildSkeleton() {
       fs.mkdirSync(BASE + '/src/stylesheets/vendor');
       done();
     });
+  });
+}
+
+function finish(answers) {
+  inquirer.prompt([{
+    type: 'confirm'
+  , name: 'ok'
+  , message: JSON.stringify(answers, null, 2) + '\nDoes this look right?'
+  , default: true
+  }], function (answer) {
+    if (answer.ok) {
+      settings = answers;
+      build();
+    }
   });
 }
 
@@ -138,12 +129,12 @@ function seed() {
 function writePackage() {
   return new Promise(function (done, fail) {
     if (args[0]) fs.mkdirSync(BASE);
-    settings.scripts = { start: './bin/cmd start' };
-    settings.devDependencies = {};
-    for (var i = 0, l = settings.tasks.length; i < l; i++) {
-      settings.devDependencies[settings.tasks[i]] = packages[settings.tasks[i]];
-    }
-    settings.devDependencies.voyager = '^0.3.0';
+    settings.scripts = { 
+      start: './bin/cmd start'
+    , build: './bin/cmd build'
+    , clean: './bin/cmd clean'
+    };
+    settings.devDependencies = { voyager: '^0.3.0'};
     fs.writeFile(j(BASE, '/package.json'), JSON.stringify(settings, null, 2), function (err) {
       if (err) return fail(err);
       done();
@@ -152,15 +143,20 @@ function writePackage() {
 }
 
 inquirer.prompt(questions, function (answers) {
-  inquirer.prompt([{
-    type: 'confirm'
-  , name: 'ok'
-  , message: JSON.stringify(answers, null, 2) + '\nDoes this look right?'
-  , default: true
-  }], function (answer) {
-    if (answer.ok) {
-      settings = answers;
-      build();
+  fs.readdir(BASE, function (err, files) {
+    if (files && files.length) {
+      inquirer.prompt([{
+        type: 'confirm'
+      , name: 'nonempty'
+      , message: 'WARNING: The directory ' + BASE + ' is not empty, do you wish to continue?'
+      , default: false
+      }], function (answer) {
+        if (answer.nonempty) {
+          finish();
+        }
+      });
+    } else {
+      finish(answers);
     }
-  });
+  });  
 });
