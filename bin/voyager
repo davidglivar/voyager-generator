@@ -56,6 +56,7 @@ function build() {
 
 function buildSkeleton() {
   return new Promise(function (done, fail) {
+    fs.mkdirSync(BASE + '/tasks');
     fs.mkdir(BASE + '/src', function (err) {
       if (err) return fail(err);
       fs.mkdirSync(BASE + '/src/fonts');
