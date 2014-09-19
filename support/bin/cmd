@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
-var voyager = require('voyager');
+var voyager = require('voyager')
+  , args = Array.prototype.slice.call(process.argv, 2);
 
-var cmd = Array.prototype.slice.call(process.argv, 2)[0];
-
-voyager[cmd]();
+voyager[args[0]](args.slice(1));
