@@ -56,6 +56,7 @@ function build() {
 
 function buildSkeleton() {
   return new Promise(function (done, fail) {
+    fs.mkdirSync(BASE + '/tasks');
     fs.mkdir(BASE + '/src', function (err) {
       if (err) return fail(err);
       fs.mkdirSync(BASE + '/src/fonts');
@@ -134,7 +135,7 @@ function writePackage() {
     , build: './bin/cmd build'
     , clean: './bin/cmd clean'
     };
-    settings.devDependencies = { voyager: '^0.3.0'};
+    settings.devDependencies = { voyager: '^0.4.0'};
     fs.writeFile(j(BASE, '/package.json'), JSON.stringify(settings, null, 2), function (err) {
       if (err) return fail(err);
       done();
