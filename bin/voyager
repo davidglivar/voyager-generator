@@ -114,13 +114,21 @@ function seed() {
     })
   , new Promise(function (done, fail) {
       vfs.src([
-          j(__dirname, '../support/.jshintrc')
-        , j(__dirname, '../support/index.html')
+          j(__dirname, '../support/index.html')
         , j(__dirname, '../support/*.txt')
         , j(__dirname, '../support/favicon.ico')
         , j(__dirname, '../support/apple-touch-icon-precomposed.png')
         ])
         .pipe(vfs.dest(j(BASE, '/src')))
+        .on('error', fail)
+        .on('end', done);
+    })
+  , new Promise(function (done, fail) {
+      vfs.src([
+          j(__dirname, '../support/.jshintrc')
+        , j(__dirname, '../support/.gitignore')
+        ])
+        .pipe(vfs.dest(BASE))
         .on('error', fail)
         .on('end', done);
     })
