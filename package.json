@@ -2,14 +2,21 @@
   "name": "voyager-generator",
   "version": "0.2.11",
   "description": "Voyager application generator",
+  "keywords": [
+    "voyager", "generator", "static", "skeleton"
+  ],
+  "homepage": "https://github.com/wieden-kennedy/voyager-generator",
+  "bugs": {
+    "url": "https://github.com/wieden-kennedy/voyager-generator/issues"
+  },
   "author": "David Glivar <davidglivar@gmail.com>",
-  "license": "ISC",
+  "license": "BSD-3-Clause",
   "bin": {
     "voyager": "./bin/voyager"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:davidglivar/voyager-generator.git"
+    "url": "git@github.com:wieden-kennedy/voyager-generator.git"
   },
   "dependencies": {
     "es6-promise": "^1.0.0",
